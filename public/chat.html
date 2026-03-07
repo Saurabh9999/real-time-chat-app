@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat</title>
+  <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+
+  <div class="chat-container">
+    
+    <div class="chat-header">
+      <span>Welcome to the Chat Room</span>
+      <button id="logoutBtn" onclick="logout()" style="float: right; margin-right: 20px;">Logout</button>
+       <!-- <span style="float: right; margin-right: 20px; cursor: pointer;" onclick="logout()">Logout</span> -->
+    </div>
+
+    <div id="messages" class="messages">
+      
+    </div>
+    
+
+    <div class="chat-input">
+      <!-- <div id="typingindicator" style="color: green;font-size: 14px;"></div> -->
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button type="button" id="sendBtn" onclick="sendMessage()">Send</button>
+      <button type="button" id="loadBtn" onclick="loadUsers()">loaduser</button>
+    </div>
+
+    <div class="sidebar">
+        <div id="userList"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="chat.js" defer></script>
+  <script>
+    function logout() {
+      // Clear the token from localStorage
+      localStorage.removeItem('token');
+      // clear the user from localStorage
+      localStorage.removeItem('user');
+      // Redirect to the login page
+      window.location.href = 'login.html';
+    }
+    </script>
+</body>
+</html>
