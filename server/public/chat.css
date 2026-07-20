@@ -244,3 +244,55 @@ body {
       transform: scale(1);
    }
 }
+
+.chat-user-name {
+  font-size: 18px;
+  /* font-weight: bold; */
+  color: white;
+  background-color: #667eea;
+  /* margin-top: 10px; */
+  padding: 6px;
+
+}
+ 
+ 
+/*file upload styles*/
+.chat-input {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px;
+}
+
+.input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+#messageInput {
+  width: 100%;
+  padding: 10px 40px 10px 10px; /* right padding for file button */
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+#fileBtn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#sendBtn {
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}

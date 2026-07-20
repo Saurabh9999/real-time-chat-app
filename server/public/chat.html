@@ -11,9 +11,9 @@
     <div class="chat-header">
       <span>Welcome to the Chat Room</span>
       <button id="logoutBtn" onclick="logout()" style="float: right; margin-right: 20px;">Logout</button>
-       <!-- <span style="float: right; margin-right: 20px; cursor: pointer;" onclick="logout()">Logout</span> -->
+       <!-- <span style="float: right; margin-right: 20px; cursor: pointer;" onclick="logout()">Logout</span> --> 
     </div>
-
+    <div id="chatUserName" class="chat-user-name"></div>
     <div id="messages" class="messages">
       
     </div>
@@ -21,8 +21,14 @@
 
     <div class="chat-input">
       <!-- <div id="typingindicator" style="color: green;font-size: 14px;"></div> -->
-      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <!-- <input type="text" id="messageInput" placeholder="Type a message..." /> -->
+       <div class="input-wrapper">
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button type="button" id="fileBtn">📎</button>
+  </div>
       <button type="button" id="sendBtn" onclick="sendMessage()">Send</button>
+      <!-- <button type="button" id="fileBtn">📎</button> New file button -->
+      <input type="file" id="fileInput" style="display:none;" /> <!-- Hidden file input -->
       <button type="button" id="loadBtn" onclick="loadUsers()">loaduser</button>
     </div>
 

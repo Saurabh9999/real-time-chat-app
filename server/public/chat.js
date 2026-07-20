@@ -8,7 +8,7 @@ let currentRoom = null;
 let onlineUsers = [];
  let typingElement = null
 
-console.log(user)
+// console.log(user)
 // =========================
 // 2️⃣ REDIRECT IF NOT LOGGED IN
 // =========================
@@ -133,6 +133,8 @@ async function loadUsers() {
 async function startChat(userId, name) {
   console.log("START CHAT CALLED");
 
+  document.getElementById("chatUserName").innerText = name;
+
   try {
     const res = await fetch("http://localhost:3000/api/conversation/", {
       method: "POST",
@@ -251,7 +253,7 @@ messageInput.addEventListener("input", () =>{
     socket.emit("stopTyping",{
       roomId:currentRoom
     })
-  },15000)
+  },5000)
 })
 
 // const typingindicator=document.getElementById("typingindicator")
