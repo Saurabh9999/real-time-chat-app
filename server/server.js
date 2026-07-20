@@ -51,6 +51,8 @@ const io = new Server(server, {
   },
 });
 
+const PORT = process.env.PORT || 3000;
+
 /* -------------------- AUTH -------------------- */
 io.use(async (socket, next) => {
   try {
@@ -277,6 +279,6 @@ app.use("/api/user", uploadProfilePictureRoute);
 app.use("/api/user", registerDeviceRoute);
 
 /* -------------------- START SERVER -------------------- */
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
