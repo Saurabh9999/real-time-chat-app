@@ -21,7 +21,6 @@ import registerDeviceRoute from "./routes/user.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
-
 const app = express();
 const server = http.createServer(app);
 
@@ -150,7 +149,7 @@ io.on("connection", async (socket) => {
 
       const populatedMessage = await newMessage.populate(
         "sender",
-        "_id name email publicKey",
+        "_id name email publicKey profilePicture",
       );
 
       const updatedConversation = await Conversation.findByIdAndUpdate(

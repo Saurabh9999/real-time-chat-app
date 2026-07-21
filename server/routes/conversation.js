@@ -34,17 +34,12 @@ router.post("/", authMiddleware, async (req, res) => {
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const conversations = await Conversation.find({
-      members: { $in: [req.user.id] },
-    })
-      .populate("members", "name email")
-      .populate({
-        path: "lastMessage",
-        populate: {
-          path: "sender",
-          select: "name",
-        },
-      })
+    const conversations = await Conversation.find({ members: { $in: [userId] } })
+  .populate("members", "_id name email publicKey profilePicture") // ✅ add profilePicture
+  .populate({
+    path: "lastMessage",
+    populate: { path: "sender", select: "_id name profilePicture" }
+  })
       .sort({ updatedAt: -1 });
 
     res.json(conversations);

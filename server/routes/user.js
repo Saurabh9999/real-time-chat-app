@@ -111,6 +111,7 @@ router.post("/login", async (req, res) => {
         email: user.email,
         isOnline: user.isOnline,
         lastSeen: user.lastSeen,
+        profilePicture: user.profilePicture,
 
         // 🔐 IMPORTANT: needed for encryption recovery
         devices: user.devices,

@@ -25,10 +25,12 @@ export default function Sidebar({
   const me = JSON.parse(localStorage.getItem("user"));
   if (!me) return null;
 
-  // ✅ Load profile picture from localStorage on mount
+  // ✅ Load from user object instead
   useEffect(() => {
-    const savedPic = localStorage.getItem("profilePicture");
-    if (savedPic) setProfilePicture(savedPic);
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    if (savedUser?.profilePicture) {
+      setProfilePicture(savedUser.profilePicture);
+    }
   }, []);
 
   const loadChats = async () => {
@@ -96,43 +98,34 @@ export default function Sidebar({
 
   /* ✅ Handle profile picture upload */
   const handleProfilePictureChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // ... existing validation code ...
 
-    // Validate on frontend too
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, and WEBP images are allowed");
-      return;
-    }
+  try {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("profilePicture", file);
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Image must be under 2MB");
-      return;
-    }
+    const res = await api.post("/user/upload-profile-picture", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
-    try {
-      setUploading(true);
+    const newPicUrl = res.data.profilePicture;
 
-      const formData = new FormData();
-      formData.append("profilePicture", file);
+    // ✅ Update state
+    setProfilePicture(newPicUrl);
 
-      const res = await api.post("/user/upload-profile-picture", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    // ✅ Update user object in localStorage so it persists after login
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    savedUser.profilePicture = newPicUrl;
+    localStorage.setItem("user", JSON.stringify(savedUser));
 
-      const newPicUrl = res.data.profilePicture;
-
-      // Save to state and localStorage
-      setProfilePicture(newPicUrl);
-      localStorage.setItem("profilePicture", newPicUrl);
-    } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Failed to upload image. Please try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
+  } catch (err) {
+    console.error("Upload failed:", err);
+    alert("Failed to upload image. Please try again.");
+  } finally {
+    setUploading(false);
+  }
+};
 
   const selectChat = async (chatOrUser) => {
     if (chatOrUser.members) {
