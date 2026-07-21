@@ -4,6 +4,7 @@ import socket from "../socket";
 import { decryptMessage } from "../utils/decrypt.js";
 import { formatChatTime } from "../utils/format_time.js";
 import { clearKeys } from "../utils/keymanager.js"; // ✅ new
+import { useNavigate } from "react-router-dom"; // ✅ new
 
 export default function Sidebar({
   setCurrentRoom,
@@ -20,6 +21,7 @@ export default function Sidebar({
   const [uploading, setUploading] = useState(false); // ✅ new
   const fileInputRef = useRef(null); // ✅ new
 
+  const navigate = useNavigate(); // ✅ new
   const me = JSON.parse(localStorage.getItem("user"));
   if (!me) return null;
 
@@ -151,21 +153,20 @@ export default function Sidebar({
     if (isMobile) setShowSidebar(false);
   };
 
-const handleLogout = async () => {
-  await clearKeys();
+  const handleLogout = async () => {
+    await clearKeys();
 
-  // ✅ Get deviceId BEFORE clearing
-  const deviceId = localStorage.getItem("deviceId");
-  
-  // Clear everything except deviceId
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  localStorage.removeItem("profilePicture");
-  // ❌ DO NOT call localStorage.clear()
+    // ✅ Get deviceId BEFORE clearing
+    const deviceId = localStorage.getItem("deviceId");
 
-  // deviceId stays in localStorage automatically
-  window.location.href = "/login";
-};
+    // Clear everything except deviceId
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("profilePicture");
+
+    // deviceId stays in localStorage automatically
+    navigate("/login");
+  };
 
   const filteredChats = chats.filter((chat) => {
     const otherUser = chat.members.find((m) => m._id !== me._id);
