@@ -35,6 +35,8 @@ function App() {
     <Routes>
       <Route path="/" element={token ? <Navigate to="/chat" /> : <Login />} />
 
+      <Route path="/login" element={<Login />} />
+
       <Route path="/signup" element={<Signup />} />
 
       <Route path="/forgot-password" element={<ForgotPassword />} />
