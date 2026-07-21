@@ -91,6 +91,7 @@ export default function ChatHeader({ user, onlineUsers, onBack }) {
                     src={user.profilePicture}
                     alt={user.name}
                     className="w-full h-full object-cover"
+                    crossorigin="anonymous"
                   />
                 ) : (
                   user.name[0].toUpperCase()

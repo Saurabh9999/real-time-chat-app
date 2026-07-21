@@ -1,35 +1,31 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import jwt from "jsonwebtoken";
 import User from "../model/user_Schema.js";
 
 const router = express.Router();
 
-/* -------------------- MULTER CONFIG -------------------- */
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // saves to /uploads folder
-  },
-  filename: (req, file, cb) => {
-    // filename: userId_timestamp.ext  e.g. 64abc123_1720000000000.jpg
-    const ext = path.extname(file.originalname);
-    cb(null, `${req.userId}_${Date.now()}${ext}`);
+/* -------------------- CLOUDINARY CONFIG -------------------- */
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+/* -------------------- MULTER CLOUDINARY STORAGE -------------------- */
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "chat-app-profiles",         // folder name in Cloudinary
+    allowed_formats: ["jpg", "png", "webp"],
+    transformation: [{ width: 300, height: 300, crop: "fill" }], // auto resize
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowed = ["image/jpeg", "image/png", "image/webp"];
-  if (allowed.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only JPG, PNG, and WEBP images are allowed"), false);
-  }
-};
-
 const upload = multer({
   storage,
-  fileFilter,
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB max
 });
 
@@ -38,7 +34,6 @@ const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ message: "No token" });
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.id;
     next();
@@ -51,17 +46,16 @@ const authMiddleware = (req, res, next) => {
 router.post(
   "/upload-profile-picture",
   authMiddleware,
-  upload.single("profilePicture"), // field name from frontend
+  upload.single("profilePicture"),
   async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      // Build public URL — e.g. http://localhost:3000/uploads/64abc_123.jpg
-      const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      // ✅ Cloudinary gives you a permanent URL directly
+      const imageUrl = req.file.path;
 
-      // Update user in DB
       const updatedUser = await User.findByIdAndUpdate(
         req.userId,
         { profilePicture: imageUrl },

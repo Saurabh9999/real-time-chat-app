@@ -1,4 +1,5 @@
 import express from "express";
+import "dotenv/config";
 import dns from "dns";
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 import http from "http";
@@ -20,7 +21,6 @@ import registerDeviceRoute from "./routes/user.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
