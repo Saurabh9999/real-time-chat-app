@@ -35,18 +35,27 @@ const decryptMessage = async (encryptedPayload, isMine) => {
 
     // ✅ FIX: If sender's own message, use self-copy
     if (isMine) {
-      if (!encryptedPayload?.cipherTextForSender || !encryptedPayload?.nonceForSender) {
+      if (
+        !encryptedPayload?.cipherTextForSender ||
+        !encryptedPayload?.nonceForSender
+      ) {
         return "[Unable to decrypt]";
       }
 
-      const cipherText = sodium.from_base64(encryptedPayload.cipherTextForSender, VARIANT);
-      const nonce = sodium.from_base64(encryptedPayload.nonceForSender, VARIANT);
+      const cipherText = sodium.from_base64(
+        encryptedPayload.cipherTextForSender,
+        VARIANT,
+      );
+      const nonce = sodium.from_base64(
+        encryptedPayload.nonceForSender,
+        VARIANT,
+      );
 
       const decrypted = sodium.crypto_box_open_easy(
         cipherText,
         nonce,
-        keyCache.publicKey,   // sender's own public key
-        keyCache.privateKey,  // sender's own private key
+        keyCache.publicKey, // sender's own public key
+        keyCache.privateKey, // sender's own private key
       );
 
       return sodium.to_string(decrypted);
@@ -61,7 +70,10 @@ const decryptMessage = async (encryptedPayload, isMine) => {
       return "[Invalid message]";
     }
 
-    const senderPublicKey = sodium.from_base64(encryptedPayload.senderPublicKey, VARIANT);
+    const senderPublicKey = sodium.from_base64(
+      encryptedPayload.senderPublicKey,
+      VARIANT,
+    );
     const cipherText = sodium.from_base64(encryptedPayload.cipherText, VARIANT);
     const nonce = sodium.from_base64(encryptedPayload.nonce, VARIANT);
 
@@ -73,7 +85,6 @@ const decryptMessage = async (encryptedPayload, isMine) => {
     );
 
     return sodium.to_string(decrypted);
-
   } catch (err) {
     console.error("❌ Decryption failed:", err);
     return "[Unable to decrypt]";
@@ -121,8 +132,14 @@ export default function Chat() {
   /* -------------------- FETCH USER PUBLIC KEY -------------------- */
   const fetchUserPublicKey = (userId) => {
     socket.emit("getUserPublicKey", userId, (res) => {
-      if (res.error) { console.error(res.error); return; }
-      if (!res.publicKey) { console.error("Public key missing"); return; }
+      if (res.error) {
+        console.error(res.error);
+        return;
+      }
+      if (!res.publicKey) {
+        console.error("Public key missing");
+        return;
+      }
       setReceiverKey(res.publicKey);
       setSelectedUser((prev) => ({ ...prev, publicKey: res.publicKey }));
     });
@@ -160,7 +177,13 @@ export default function Chat() {
     loadMessages();
     socket.emit("joinRoom", currentRoom);
 
-    const handleMessage = async ({ encryptedPayload, sender, _id, createdAt, conversation }) => {
+    const handleMessage = async ({
+      encryptedPayload,
+      sender,
+      _id,
+      createdAt,
+      conversation,
+    }) => {
       if (conversation._id !== currentRoom) return;
       if (sender._id === me._id) return;
 
@@ -187,11 +210,14 @@ export default function Chat() {
 
     if (!roomId) {
       try {
-        const res = await api.post("/conversation/", { userId: selectedUser._id });
+        const res = await api.post("/conversation/", {
+          userId: selectedUser._id,
+        });
         roomId = res.data._id;
         setCurrentRoom(roomId);
       } catch (err) {
-        console.error(err); return;
+        console.error(err);
+        return;
       }
     }
 
@@ -200,7 +226,10 @@ export default function Chat() {
       await loadKeys();
 
       const finalReceiverKey = receiverKey || selectedUser?.publicKey;
-      if (!finalReceiverKey) { console.error("Receiver public key missing"); return; }
+      if (!finalReceiverKey) {
+        console.error("Receiver public key missing");
+        return;
+      }
 
       const encryptedPayload = await encryptMessage(
         text,
@@ -214,7 +243,7 @@ export default function Chat() {
         ...prev,
         {
           _id: Date.now(),
-          text,              // plain text is fine here — sender just typed it
+          text, // plain text is fine here — sender just typed it
           sender: me,
           createdAt: new Date().toISOString(),
           status: "sending",
@@ -231,9 +260,12 @@ export default function Chat() {
 
   /* -------------------- UI -------------------- */
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-gray-100">
+      {/* Sidebar — full screen on mobile, fixed width on desktop */}
       {(showSidebar || !isMobile) && (
-        <div className="w-full md:w-80 border-r bg-white">
+        <div
+          className={`${isMobile ? "w-screen" : "w-80 shrink-0"} border-r bg-white overflow-hidden`}
+        >
           <Sidebar
             setCurrentRoom={(room) => {
               setCurrentRoom(room);
@@ -243,12 +275,15 @@ export default function Chat() {
               setSelectedUser(user);
               fetchUserPublicKey(user._id);
             }}
+            isMobile={isMobile}
+            setShowSidebar={setShowSidebar}
           />
         </div>
       )}
 
+      {/* Chat area — only show on mobile when sidebar is hidden */}
       {(!showSidebar || !isMobile) && (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <ChatHeader
             user={selectedUser}
             onlineUsers={onlineUsers}
@@ -258,7 +293,9 @@ export default function Chat() {
 
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 bg-gray-50">
             {!selectedUser ? (
-              <div className="text-gray-400 text-center mt-10">Select a chat</div>
+              <div className="text-gray-400 text-center mt-10">
+                Select a chat
+              </div>
             ) : messages.length === 0 ? (
               <div className="text-gray-400 text-center mt-10">Say hi 👋</div>
             ) : (
@@ -272,16 +309,18 @@ export default function Chat() {
                 return (
                   <div
                     key={msg._id}
-                    className={`px-4 py-2 rounded-2xl max-w-[75%] md:max-w-xs shadow ${
+                    className={`px-4 py-2 rounded-2xl max-w-[75%] shadow ${
                       isMine
                         ? "bg-blue-500 text-white self-end"
                         : "bg-white text-gray-800 self-start"
                     }`}
                   >
                     {!isMine && (
-                      <div className="text-sm font-semibold mb-1">{msg.sender?.name}</div>
+                      <div className="text-sm font-semibold mb-1">
+                        {msg.sender?.name}
+                      </div>
                     )}
-                    <div>{msg.text}</div>
+                    <div className="wrap-break-words">{msg.text}</div>
                     <div className="text-xs mt-1 text-right opacity-70">
                       {time} · {msg.status}
                     </div>
@@ -292,7 +331,7 @@ export default function Chat() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="h-16 border-t flex items-center px-4 bg-white gap-2">
+          <div className="border-t flex items-center px-4 py-3 bg-white gap-2">
             {selectedUser ? (
               <MessageInput onSend={handleSendMessage} />
             ) : (
@@ -303,33 +342,33 @@ export default function Chat() {
       )}
     </div>
   );
-}
 
-/* -------------------- INPUT -------------------- */
-function MessageInput({ onSend }) {
-  const [text, setText] = useState("");
+  /* -------------------- INPUT -------------------- */
+  function MessageInput({ onSend }) {
+    const [text, setText] = useState("");
 
-  const handleSend = () => {
-    if (!text.trim()) return;
-    onSend(text.trim());
-    setText("");
-  };
+    const handleSend = () => {
+      if (!text.trim()) return;
+      onSend(text.trim());
+      setText("");
+    };
 
-  return (
-    <>
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        placeholder="Type a message..."
-        className="flex-1 border rounded-full px-4 py-2 outline-none"
-      />
-      <button
-        onClick={handleSend}
-        className="bg-blue-500 text-white px-5 py-2 rounded-full"
-      >
-        Send
-      </button>
-    </>
-  );
+    return (
+      <>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="Type a message..."
+          className="flex-1 border rounded-full px-4 py-2 outline-none"
+        />
+        <button
+          onClick={handleSend}
+          className="bg-blue-500 text-white px-5 py-2 rounded-full"
+        >
+          Send
+        </button>
+      </>
+    );
+  }
 }
